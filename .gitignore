@@ -8,7 +8,7 @@ __pycache__/
 dist/
 build/
 *.whl
-
+database.ini
 # Виртуальные окружения
 .venv/
 venv/
