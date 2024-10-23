@@ -89,6 +89,38 @@ class DbManager:
             # Сохраняем вакансию
             self.save_vacancy(vacancy_id, title, salary_min, salary_max, employer_id, url)
 
+    def get_companies_and_vacancies_count(self):
+        """Получить список всех компаний и количество вакансий у каждой компании."""
+        with self.conn.cursor() as cur:
+            cur.execute("""
+                SELECT companies.name, COUNT(vacancies.id)
+                FROM companies
+                LEFT JOIN vacancies ON companies.id = vacancies.company_id
+                GROUP BY companies.name;
+            """)
+            return cur.fetchall()
+
+    def get_all_vacancies(self):
+        """Получить список всех вакансий."""
+        with self.conn.cursor() as cur:
+            cur.execute("""
+                SELECT companies.name, vacancies.title, vacancies.salary_min, 
+                       vacancies.salary_max, vacancies.url
+                FROM vacancies
+                JOIN companies ON vacancies.company_id = companies.id;
+            """)
+            return cur.fetchall()
+
+    def get_avg_salary(self):
+        """Получить среднюю зарплату."""
+        with self.conn.cursor() as cur:
+            cur.execute("""
+                SELECT AVG((salary_min + salary_max) / 2.0) AS avg_salary
+                FROM vacancies
+                WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL;
+            """)
+            return cur.fetchone()[0]
+
     def close(self):
         """Закрывает соединение с базой данных."""
         if self.conn:
